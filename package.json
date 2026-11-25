@@ -7,7 +7,8 @@
   "scripts": {
     "build": "tsc -p ./tsconfig.json",
     "start:dev": "tsc-watch --noClear -p ./tsconfig.json --onSuccess \"node ./dist/src/app.js\"",
-    "crear-admin": "tsc && node dist/src/scripts/crearAdmin.js"
+    "crearAdmin": "tsc && node dist/src/scripts/crearAdmin.js",
+    "crearEntidades": "tsc && node dist/src/scripts/crearEntidades.js"
   },
   "keywords": [],
   "author": "",
@@ -22,8 +23,8 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "24.0.3",
     "tsc-alias": "^1.8.16",
-    "tsc-watch": "6.0.4",
-    "typescript": "5.1.3"
+    "tsc-watch": "^6.0.4",
+    "typescript": "^5.1.3"
   },
   "dependencies": {
     "@mikro-orm/core": "5.8.10",
