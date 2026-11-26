@@ -118,19 +118,20 @@ async function findOne(req: Request, res: Response) {
 }
 
 async function add(req: Request, res: Response) {
-  try {
+    try {
     // Obtener el ID del usuario autenticado de la sesión
     const usuarioCreadorId = req.session?.usuario?.id;
     
     if (!usuarioCreadorId) {
-      res.status(401).json({ message: 'Usuario no autenticado' });
+        res.status(401).json({ message: 'Usuario no autenticado' })
+        return;
     }
 
     const resultado = await crearTorneoInscripcion(req.body.sanitizedInput, usuarioCreadorId.toString());
     res.status(201).json({ message: 'Torneo e inscripcion creados', data: resultado });
-  } catch (error: any) {
+    } catch (error: any) {
     res.status(400).json({ message: error.message });
-  }
+    }
 }
 
 async function update(req: Request, res: Response) {

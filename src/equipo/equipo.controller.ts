@@ -51,20 +51,21 @@ async function findOne(req:Request,res: Response){
 
 
 async function add(req: Request, res: Response) {
-  const em = orm.em.fork();
+    const em = orm.em.fork();
 
-  try {
+    try {
     const { nombre, descripcion, capitan, jugadores } = req.body.sanitizedInput;
 
     if (!capitan) {
-      res.status(400).json({ message: "El equipo debe tener un capitán" });
+        res.status(400).json({ message: "El equipo debe tener un capitán" })
+        return;
     }
 
     // Crear el equipo base
     const equipo = em.create(Equipo, {
-      nombre,
-      descripcion,
-      capitan: await em.getReference(Usuario, capitan),
+        nombre,
+        descripcion,
+        capitan: await em.getReference(Usuario, capitan),
     });
 
     // Guardamos el equipo inicialmente para obtener un ID
@@ -72,14 +73,14 @@ async function add(req: Request, res: Response) {
 
     // Si vienen jugadores, los agregamos
     if (Array.isArray(jugadores) && jugadores.length > 0) {
-      const jugadoresEntidades = await em.find(Usuario, { id: { $in: jugadores } });
-
-      if (jugadoresEntidades.length > 0) {
-        jugadoresEntidades.forEach((jugador) => equipo.jugadores.add(jugador));
-        console.log(`Se agregaron ${jugadoresEntidades.length} jugadores al equipo.`);
-      } else {
-        console.warn("No se encontraron jugadores con los IDs enviados.");
-      }
+        const jugadoresEntidades = await em.find(Usuario, { id: { $in: jugadores } });
+        
+        if (jugadoresEntidades.length > 0) {
+            jugadoresEntidades.forEach((jugador) => equipo.jugadores.add(jugador));
+            console.log(`Se agregaron ${jugadoresEntidades.length} jugadores al equipo.`);
+        } else {
+            console.warn("No se encontraron jugadores con los IDs enviados.");
+        }
     }
 
     // Guardamos todo
@@ -88,14 +89,14 @@ async function add(req: Request, res: Response) {
     console.log("Equipo creado con éxito:", equipo);
 
     res.status(201).json({
-      message: "Equipo creado correctamente",
-      data: equipo,
+        message: "Equipo creado correctamente",
+        data: equipo,
     });
 
-  } catch (error: any) {
-    console.error("Error al crear equipo:", error);
-    res.status(500).json({ message: error.message });
-  }
+    } catch (error: any) {
+        console.error("Error al crear equipo:", error);
+        res.status(500).json({ message: error.message });
+    }
 }
 
 

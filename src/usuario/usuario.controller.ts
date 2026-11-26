@@ -314,7 +314,8 @@ export const findOne = async (req: Request, res: Response) => {
     const usuario = await UsuarioService.findOne(id);
     
     if (!usuario) {
-    	res.status(404).json({ message: 'Usuario no encontrado' });
+      res.status(404).json({ message: 'Usuario no encontrado' })
+      return;
     }
 
     res.status(200).json({
@@ -333,9 +334,10 @@ export const remove = async (req: Request, res: Response) => {
     
     // Verificar que el admin no se elimine a sí mismo
     if (req.session?.usuario?.id === id) {
-    	res.status(400).json({ 
+      res.status(400).json({ 
       message: 'No puedes eliminarte a ti mismo' 
-      });
+      })
+      return;
     }
 
     await UsuarioService.deleteUser(id);

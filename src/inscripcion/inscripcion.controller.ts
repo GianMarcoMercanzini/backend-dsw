@@ -26,13 +26,15 @@ export async function inscribirUsuarioIndividual(req: Request, res: Response) {
 
     // Verificar que es torneo individual
     if (!torneo.tipoDeTorneo.esIndividual) {
-      res.status(400).json({ message: "Este torneo no es individual" });
+      res.status(400).json({ message: "Este torneo no es individual" })
+      return;
     }
 
     // Verificar fechas de inscripción
     const ahora = new Date();
     if (ahora < torneo.fechaInicioIns || ahora > torneo.fechaFinIns) {
-      res.status(400).json({ message: "Fuera del período de inscripción" });
+      res.status(400).json({ message: "Fuera del período de inscripción" })
+      return;
     }
 
     // Verificar que el usuario existe
@@ -45,7 +47,8 @@ export async function inscribirUsuarioIndividual(req: Request, res: Response) {
     });
 
     if (inscripcionExistente) {
-      res.status(400).json({ message: "Ya estás inscrito en este torneo" });
+      res.status(400).json({ message: "Ya estás inscrito en este torneo" })
+      return;
     }
 
     // Crear inscripción individual
@@ -80,13 +83,15 @@ export async function inscribirEquipo(req: Request, res: Response) {
 
     // Verificar que es torneo por equipos
     if (torneo.tipoDeTorneo.esIndividual) {
-      res.status(400).json({ message: "Este torneo es individual, no por equipos" });
+      res.status(400).json({ message: "Este torneo es individual, no por equipos" })
+      return;
     }
 
     // Verificar fechas de inscripción
     const ahora = new Date();
     if (ahora < torneo.fechaInicioIns || ahora > torneo.fechaFinIns) {
-      res.status(400).json({ message: "Fuera del período de inscripción" });
+      res.status(400).json({ message: "Fuera del período de inscripción" })
+      return;
     }
 
     // Verificar que el equipo existe
@@ -101,7 +106,8 @@ export async function inscribirEquipo(req: Request, res: Response) {
     });
 
     if (inscripcionExistente) {
-      res.status(400).json({ message: "El equipo ya está inscrito en este torneo" });
+      res.status(400).json({ message: "El equipo ya está inscrito en este torneo" })
+      return;
     }
 
     // Crear inscripción de equipo
@@ -132,7 +138,8 @@ export async function obtenerEquiposDelUsuarioAutenticado(req: Request, res: Res
     const usuarioId = req.session?.usuario?.id;
     
     if (!usuarioId) {
-      res.status(401).json({ message: 'Usuario no autenticado' });
+      res.status(401).json({ message: 'Usuario no autenticado' })
+      return;
     }
 
     const equipos = await em.find(Equipo, {
