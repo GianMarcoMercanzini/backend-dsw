@@ -37,7 +37,7 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
 // Middleware para rutas que requieren autenticación
 export function requireAuth(req: Request, res: Response, next: NextFunction): void {
 	if (!req.session?.usuario) {
-  	res.status(401).json({ message: 'Acceso no autorizado' });
+    res.status(401).json({ message: 'Acceso no autorizado' });
 		return;
   }
   next();
@@ -46,7 +46,7 @@ export function requireAuth(req: Request, res: Response, next: NextFunction): vo
 // Middleware para verificar si es admin
 export function requireAdmin(req: Request, res: Response, next: NextFunction): void {
 	if (!req.session?.usuario) {
-  	res.status(401).json({ message: 'Acceso no autorizado' });
+    res.status(401).json({ message: 'Acceso no autorizado' });
 		return;
   }
   
@@ -58,6 +58,26 @@ export function requireAdmin(req: Request, res: Response, next: NextFunction): v
   
   next();
 }
+
+// Middleware para rutas de usuario: permite continuar si es admin
+// o si el :id de la ruta es el del propio usuario autenticado
+export function requireSelfOrAdmin(req: Request, res: Response, next: NextFunction): void {
+  if (!req.session?.usuario) {
+    res.status(401).json({ message: 'Acceso no autorizado' });
+    return;
+  }
+
+  const { id: userId, rol } = req.session.usuario;
+  const targetId = Number.parseInt(req.params.id, 10);
+
+  if (rol === 'admin' || userId === targetId) {
+    next();
+    return;
+  }
+
+  res.status(403).json({ message: 'No tienes permisos para esta acción' });
+}
+
 
 export async function requireOwnerOrAdmin(req: Request, res: Response, next: NextFunction): Promise<void> {
   // Verificar sesión y usuario

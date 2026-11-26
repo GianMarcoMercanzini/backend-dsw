@@ -15,7 +15,7 @@ import {
   getUsuariosAdmin,
   deleteUsuarioAdmin 
 } from "./usuario.controller.js"; 
-import { requireAuth, requireAdmin, requireOwnerOrAdmin } from "../shared/middleware/auth.middleware.js";
+import { requireAuth, requireAdmin, requireSelfOrAdmin } from "../shared/middleware/auth.middleware.js";
 
 export const usuarioRouter = Router();
 
@@ -29,8 +29,8 @@ usuarioRouter.get('/ruta/protegida', requireAuth, protegida);
 usuarioRouter.get('/sin-equipo', requireAuth, getUsuariosSinEquipo);
 
 // Rutas de perfil (usuario autenticado puede editar su propio perfil)
-usuarioRouter.put('/:id', requireAuth, requireOwnerOrAdmin, validateUsuarioUpdate, sanitizeUsuarioInput, update);
-usuarioRouter.patch('/:id', requireAuth, requireOwnerOrAdmin, validateUsuarioUpdate, sanitizeUsuarioInput, update);
+usuarioRouter.put('/:id', requireAuth,requireSelfOrAdmin, validateUsuarioUpdate, sanitizeUsuarioInput, update);
+usuarioRouter.patch('/:id', requireAuth,requireSelfOrAdmin, validateUsuarioUpdate, sanitizeUsuarioInput, update);
 
 // Rutas de administración (SOLO ADMINS)
 usuarioRouter.get('/', requireAuth, requireAdmin, findAll);
