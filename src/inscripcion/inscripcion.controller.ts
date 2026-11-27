@@ -75,6 +75,17 @@ export async function inscribirUsuarioIndividual(req: Request, res: Response) {
 export async function inscribirEquipo(req: Request, res: Response) {
   try {
     const { torneoId, equipoId } = req.body;
+    const usuarioSesion = req.session?.usuario; 
+
+    if (!usuarioSesion) {
+      res.status(401).json({ message: 'Usuario no autenticado' });
+      return;
+    }
+
+    if (!torneoId || !equipoId) {
+      res.status(400).json({ message: 'torneoId y equipoId son obligatorios' });
+      return;
+    }
 
     // Verificar que el torneo existe
     const torneo = await em.findOneOrFail(Torneo, torneoId, {
@@ -96,8 +107,14 @@ export async function inscribirEquipo(req: Request, res: Response) {
 
     // Verificar que el equipo existe
     const equipo = await em.findOneOrFail(Equipo, equipoId, {
-      populate: ['capitan']
+      populate: ['capitan', 'jugadores']
     });
+
+    // solo el capitán del equipo (o un admin) puede inscribirlo
+    if (usuarioSesion.rol !== 'admin' && equipo.capitan.id !== usuarioSesion.id) {
+      res.status(403).json({ message: "Solo el capitán puede inscribir al equipo" });
+      return;
+    }
 
     // Verificar si el equipo ya está inscrito (usando InscripcionEquipo)
     const inscripcionExistente = await em.findOne(InscripcionEquipo, {
@@ -108,6 +125,24 @@ export async function inscribirEquipo(req: Request, res: Response) {
     if (inscripcionExistente) {
       res.status(400).json({ message: "El equipo ya está inscrito en este torneo" })
       return;
+    }
+
+    // verificar cantidad de jugadores del equipo (capitán + jugadores)
+    const cantidadJugadores = equipo.jugadores.length + 1;
+    if (torneo.cantJugadoresEquipo != null && cantidadJugadores !== torneo.cantJugadoresEquipo) {
+      res.status(400).json({
+        message: `El torneo requiere equipos de ${torneo.cantJugadoresEquipo} jugadores y el equipo tiene ${cantidadJugadores}`
+      });
+      return;
+    }
+
+    // verificar cupo de equipos del torneo
+    if (torneo.cantEquipos != null) {
+      const equiposInscriptos = await em.count(InscripcionEquipo, { inscripcion: torneo.inscripcion.id });
+      if (equiposInscriptos >= torneo.cantEquipos) {
+        res.status(400).json({ message: "El torneo ya alcanzó la cantidad máxima de equipos" });
+        return;
+      }
     }
 
     // Crear inscripción de equipo
@@ -162,7 +197,7 @@ export async function obtenerEquiposDelUsuarioAutenticado(req: Request, res: Res
   }
 }
 
-// Verificar inscripción - CORREGIDO
+// Verificar inscripción 
 export async function verificarInscripcion(req: Request, res: Response) {
   try {
     const torneoId = parseInt(req.params.torneoId);

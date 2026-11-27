@@ -18,4 +18,4 @@ equipoRouter.get('/:id', requireAuth, findOne)
 // Dueño del equipo O admin pueden actualizar equipos
 equipoRouter.put('/:id', requireAuth, requireOwnerOrAdmin, sanitizeEquipoInput, update)
 equipoRouter.patch('/:id', requireAuth, requireOwnerOrAdmin, sanitizeEquipoInput, update)
-equipoRouter.delete('/:id', requireAuth, remove)
+equipoRouter.delete('/:id', requireAuth, requireOwnerOrAdmin, remove)
