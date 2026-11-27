@@ -2,6 +2,7 @@ import { Request, Response, NextFunction} from 'express';
 import { Equipo } from './equipo.entity.js';
 import { Usuario } from '../usuario/usuario.entity.js';
 import { orm } from '../shared/db/orm.js';
+import { InscripcionEquipo } from '../inscripcion/inscripcionEquipo.entity.js';
 
 function sanitizeEquipoInput(req:Request, res:Response, next:NextFunction){
     req.body.sanitizedInput = {
@@ -121,6 +122,13 @@ async function remove(req:Request, res: Response){
     const em = orm.em.fork(); 
     try { 
         const id = Number.parseInt(req.params.id) 
+        // no se puede eliminar un equipo que esta inscrito a algun torneo
+        const inscripciones = await em.count(InscripcionEquipo, {equipo:id})
+        if(inscripciones > 0){
+            res.status(409).json({message:'No se puede eliminar un equipo inscrito en torneo'})
+            return;
+        }
+        
         const equipoDelete = em.getReference(Equipo, id) 
         await em.removeAndFlush(equipoDelete) 
 
