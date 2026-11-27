@@ -203,6 +203,17 @@ export async function verificarInscripcion(req: Request, res: Response) {
     const torneoId = parseInt(req.params.torneoId);
     const usuarioId = parseInt(req.params.usuarioId);
 
+    // solo se puede consultar la propia inscripción o si es admin
+    const usuarioSesion = req.session?.usuario;
+    if (!usuarioSesion) {
+      res.status(401).json({ message: 'Usuario no autenticado' });
+      return;
+    }
+    if (usuarioSesion.rol !== 'admin' && usuarioSesion.id !== usuarioId) {
+      res.status(403).json({ message: 'No tienes permisos para consultar la inscripción de otro usuario' });
+      return;
+    }
+
     const torneo = await em.findOneOrFail(Torneo, torneoId, {
       populate: ['inscripcion', 'tipoDeTorneo']
     });
